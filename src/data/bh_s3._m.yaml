@@ -1,0 +1,7 @@
+names:
+- Fallen
+- Standing
+nc: 2
+test: /home/dh/.clearml/cache/storage_manager/datasets/ds_cd47268951534d36b906edc85e1b82a8/
+train: /home/dh/.clearml/cache/storage_manager/datasets/ds_53ed68a39622410597cb3c251de02794/
+val: /home/dh/.clearml/cache/storage_manager/datasets/ds_240f9f89f7ee49799343fb39dd7bc5fe/
