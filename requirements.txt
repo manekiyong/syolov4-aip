@@ -12,3 +12,4 @@ tensorboard >= 1.14
 pyyaml==6.0
 scipy==1.8.1
 pandas
+clearml==1.4.1

@@ -351,6 +351,13 @@ def train(hyp, opt, device, tb_writer=None):
                 if best_fitness == fi:
                     torch.save(ckpt, best)
                 del ckpt
+                if final_epoch and opt.s3: # Upload data on last epoch if opt.s3 is True
+                    clearml_ds = Dataset.create(dataset_name=opt.name+'_models', dataset_project = 'datasets/yolov4/models')
+                    clearml_ds.add_files(best)
+                    clearml_ds.upload(output_url='s3://experiment-logging/')
+                    clearml_ds.finalize()
+                    clearml_ds.publish()
+
         # end epoch ----------------------------------------------------------------------------------------------------
     # end training
 
@@ -448,6 +455,7 @@ if __name__ == '__main__':
         with open(new_yaml_file, 'w') as yaml_file:
             yaml.dump(data_yaml, yaml_file, default_flow_style=False)
         opt.data = new_yaml_file # use the modified yaml file
+
 
     # Resume
     if opt.resume:
