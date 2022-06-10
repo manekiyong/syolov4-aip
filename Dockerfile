@@ -11,13 +11,14 @@ ENV PYTHONDONTWRITEBYTECODE 1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED 1
 
-ADD build /build
-WORKDIR /build
-RUN make
-
+RUN apt-get update && apt-get install libgl1 -y
+ADD requirements.txt .
+RUN python -m pip install -r requirements.txt
 ADD /src /src
-RUN mkdir /data
-RUN mkdir /models
-
+WORKDIR /src/mish-cuda/
+RUN python setup.py build install
 
 WORKDIR /src
+
+CMD ["./train.sh"]
+

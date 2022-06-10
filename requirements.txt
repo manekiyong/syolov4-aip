@@ -13,3 +13,4 @@ pyyaml==6.0
 scipy==1.8.1
 pandas
 clearml==1.4.1
+boto3==1.21.44
