@@ -26,9 +26,6 @@ from utils.general import (
     get_latest_run, check_git_status, check_file, increment_dir, print_mutation, plot_evolution)
 from utils.google_utils import attempt_download
 from utils.torch_utils import init_seeds, ModelEMA, select_device, intersect_dicts
-from clearml import Task, Dataset
-
-PROJECT_NAME = 'scaled_yolo_v4'
 
 
 def train(hyp, opt, device, tb_writer=None):
@@ -351,13 +348,6 @@ def train(hyp, opt, device, tb_writer=None):
                 if best_fitness == fi:
                     torch.save(ckpt, best)
                 del ckpt
-                if final_epoch and opt.s3: # Upload data on last epoch if opt.s3 is True
-                    clearml_ds = Dataset.create(dataset_name=opt.name+'_models', dataset_project = 'datasets/yolov4/models')
-                    clearml_ds.add_files(best)
-                    clearml_ds.upload(output_url='s3://experiment-logging/')
-                    clearml_ds.finalize()
-                    clearml_ds.publish()
-
         # end epoch ----------------------------------------------------------------------------------------------------
     # end training
 
@@ -406,55 +396,7 @@ def main(args=None):
     parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode')
     parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')
     parser.add_argument('--logdir', type=str, default='runs/', help='logging directory')
-
-    #ClearML Bits
-    parser.add_argument('--clearml', action='store_true', help='Log Experiment with ClearML')
-    parser.add_argument('--remote', action='store_true', help='Remote Execution')
-    parser.add_argument('--s3', action='store_true', help='Retrieve Training Data from S3 instead')
-    parser.add_argument('--data_proj_name', type=str, default='', help='dataset_project arg for ClearML Dataset')
     opt = parser.parse_args(args)
-
-    if opt.clearml:
-        clearml_task = Task.init(project_name=PROJECT_NAME, task_name='syolov4_'+opt.name)
-        if opt.remote:
-            clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04")
-            # clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04", 
-            #         docker_setup_bash_script=['pip3 install sklearn', 'pip3 install matplotlib']
-            # )
-            clearml_task.execute_remotely(queue_name="compute")
-
-    if opt.s3:
-        if opt.data_proj_name=='':
-            print("No data project name provided! Terminating...")
-            exit()
-        # If loading from S3, overwrite the train/val/test path with ClearML get_local_copy path
-        
-        print(os.listdir())
-        with open(opt.data, 'r') as f:
-            data_yaml = yaml.safe_load(f)
-        train_path = Dataset.get(
-            dataset_name='train', 
-            dataset_project=opt.data_proj_name
-        ).get_local_copy()
-        train_path = os.path.join(train_path, '')
-        val_path = Dataset.get(
-            dataset_name='val', 
-            dataset_project=opt.data_proj_name
-        ).get_local_copy()
-        val_path = os.path.join(val_path, '')
-        test_path = Dataset.get(
-            dataset_name='test', 
-            dataset_project=opt.data_proj_name
-        ).get_local_copy()
-        test_path = os.path.join(test_path, '')
-        data_yaml['train']=train_path
-        data_yaml['val']=val_path
-        data_yaml['test']=test_path
-        new_yaml_file = opt.data[:-5]+"_m.yaml" if opt.data[:-5]=='.yaml' else opt.data[:-4]+"_m.yaml"
-        with open(new_yaml_file, 'w') as yaml_file:
-            yaml.dump(data_yaml, yaml_file, default_flow_style=False)
-        opt.data = new_yaml_file # use the modified yaml file
-
 
     # Resume
     if opt.resume:
@@ -576,4 +518,4 @@ def main(args=None):
               'hyperparameters: $ python train.py --hyp %s' % (yaml_file, yaml_file))
 
 if __name__ == '__main__':
-
+    main()
