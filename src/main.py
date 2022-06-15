@@ -37,7 +37,7 @@ if __name__ == "__main__":
     Task.force_requirements_env_freeze(force=True, requirements_file='../requirements.txt')
     clearml_task = Task.init(project_name=PROJECT_NAME, task_name='syolov4_'+train_args['name'])
     if args.remote:
-        clearml_task.set_base_docker("nvidia/cuda:11.3.0-cudnn8-devel-ubuntu20.04")
+        clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04")
         clearml_task.execute_remotely(queue_name="compute")
 
     ## Set Base Docker & bits for remote execution
