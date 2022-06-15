@@ -1,0 +1,25 @@
+adam: false
+batch-size: 8
+bucket: ''
+cache_images: false
+cfg: ''
+data: data/goog_dummy.yaml
+device: 0
+epochs: 10
+evolve: false
+hyp: ''
+img-size:
+- 640
+- 640
+local_rank: -1
+logdir: runs/
+multi_scale: false
+name: test
+noautoanchor: false
+nosave: true
+notest: false
+rect: false
+resume: false
+single_cls: false
+sync-bn: false
+weights: yolov4-p5_.pt
