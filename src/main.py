@@ -1,11 +1,11 @@
+from threading import local
 from clearml import Task, Dataset
-import sys
 import os
 import yaml
 import argparse
-import itertools
+import subprocess
 
-import train_aip
+
 
 PROJECT_NAME = 'scaled_yolo_v4'
 
@@ -29,7 +29,9 @@ def get_args():
 
 
 if __name__ == "__main__":
+
     args = get_args() #Get Clearml args
+
 
     with open(args.train_config, 'r') as f:
         train_args = yaml.safe_load(f)
@@ -37,9 +39,35 @@ if __name__ == "__main__":
     Task.force_requirements_env_freeze(force=True, requirements_file='../requirements.txt')
     clearml_task = Task.init(project_name=PROJECT_NAME, task_name='syolov4_'+train_args['name'])
     if args.remote:
+        # clearml_task.set_base_docker("nvcr.io/nvidia/pytorch:21.06-py3",
+        #     docker_arguments=['-w', '/src'],
+        #     docker_setup_bash_script=['git clone https://github.com/thomasbrandon/mish-cuda.git', 'ls', 'ls mish-cuda', 'cd mish-cuda', 'python setup.py build install']
+        # )
+        # clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04",
+        #     docker_arguments=['-w', '/src'],
+        #     docker_setup_bash_script=['git clone https://github.com/thomasbrandon/mish-cuda.git', 'ls', 'ls mish-cuda', 'cd mish-cuda', 'python3 setup.py build install']
+        # )
+        # local_path = os.getcwd()
+        # env_path = '/src'
         clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04")
         clearml_task.execute_remotely(queue_name="compute")
+        print(os.listdir())
+        print(os.getcwd())
+        cwd = os.getcwd() # Save current working directory, to jump back later after installation
+        subprocess.run("git clone https://github.com/thomasbrandon/mish-cuda.git".split())
+        os.chdir('mish-cuda')
+        print(os.getcwd())
+        print(os.listdir())
+        subprocess.run(['python3', 'setup.py', 'build', 'install'])
+        # subprocess.call(['python3 setup.py build install', './install_mish.sh'])
+        os.chdir(cwd)
 
+    # only putting the import statement here because i need to install 
+    # the damn mish before i could move on with life, otherwise in normal 
+    # case where environments require no further setup, importing can be 
+    # done entirely on the top
+    import train_aip 
+    
     ## Set Base Docker & bits for remote execution
     if args.s3:
         # Obtain Dataset 
@@ -62,6 +90,15 @@ if __name__ == "__main__":
         with open(new_yaml_file, 'w') as yaml_file:
             yaml.dump(data_yaml, yaml_file, default_flow_style=False)
         train_args['data'] = new_yaml_file # use the modified yaml file
+
+        # Get Pretrained Model
+        pretrained_path = Dataset.get(
+            dataset_name='pretrained-p5', 
+            dataset_project='dataset/yolov4/models'
+        ).get_local_copy()
+        pretrained_path = os.path.join(pretrained_path, '')
+        train_args['weights'] = pretrained_path+train_args['weights']
+
 
     args_list = []
     for x in train_args:
