@@ -6,7 +6,6 @@ import argparse
 import subprocess
 
 
-
 PROJECT_NAME = 'scaled_yolo_v4'
 
 def generate_arg_dict():
@@ -52,9 +51,12 @@ if __name__ == "__main__":
         # )
         # clearml_task.execute_remotely(queue_name="compute")
 
-        clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04")
+        clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04",
+            docker_setup_bash_script=['export PYTHONPATH=/usr/local/lib/python3.8/dist-packages:/root/.clearml/venvs-builds/3.8/task_repository/syolov4-aip.git/src']    
+        )
         clearml_task.execute_remotely(queue_name="compute")
 
+        subprocess.run(["sh", "./install_mish.sh"])
         subprocess.run(["sh", "./install_mish.sh"])
 
         print(os.listdir())
@@ -67,11 +69,12 @@ if __name__ == "__main__":
         # subprocess.run(['python3', 'setup.py', 'build', 'install'])
         # subprocess.call(['python3 setup.py build install', './install_mish.sh'])
         # os.chdir(cwd)
-        # for k, v in sorted(os.environ.items()):
-        #     print(k+':', v)
-        # print('\n')
+        for k, v in sorted(os.environ.items()):
+            print(k+':', v)
+        print('\n')
         subprocess.run(['pip', 'show', 'mish_cuda'])
         subprocess.run(['pip', 'freeze'])
+        import mish_cuda
 
 
 
