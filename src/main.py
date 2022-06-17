@@ -40,24 +40,23 @@ if __name__ == "__main__":
     if args.remote:
 
         # clearml_task.set_base_docker("nvcr.io/nvidia/pytorch:21.09-py3",
-        #     docker_arguments=['-w', '/src'],
-        #     docker_setup_bash_script=['ls', 'ls mish-cuda', 'cd mish-cuda', 'python setup.py build install', 'cd ..']
+        #     docker_setup_bash_script=['pwd', 'ls', 'ls mish-cuda', 'cd mish-cuda', 'python setup.py build install', 'cd ..']
         # )
         # clearml_task.execute_remotely(queue_name="compute")
 
-        # clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04",
-        #     docker_arguments=['-w', '/src'],
-        #     docker_setup_bash_script=['git clone https://github.com/thomasbrandon/mish-cuda.git', 'ls', 'ls mish-cuda', 'cd mish-cuda', 'python3 setup.py build install']
-        # )
-        # clearml_task.execute_remotely(queue_name="compute")
-
-        clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04")
+ 
+        clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04",
+            docker_setup_bash_script=['pip3 show wheel', 'pip show wheel']
+        )
         clearml_task.execute_remotely(queue_name="compute")
 
         cwd = os.getcwd()
         os.chdir('mish-cuda/dist')
-        subprocess.run(['pip3', 'install', 'mish_cuda-0.0.3-cp39-cp39-linux_x86_64.whl'])
+        # subprocess.run('python3 -m pip install --upgrade pip'.split())
+        subprocess.run(['pip3', 'install', 'mish_cuda-0.0.3-cp38-cp38-linux_x86_64.whl'])
         os.chdir(cwd)
+
+
         # # subprocess.run(["sh", "./install_mish.sh"])
 
         #  # Save current working directory, to jump back later after installation
