@@ -1,3 +1,4 @@
-git clone https://github.com/thomasbrandon/mish-cuda.git
-cd mish_cuda
+# git clone https://github.com/thomasbrandon/mish-cuda.git
+cd mish-cuda
 python3 setup.py build install
+cd ..

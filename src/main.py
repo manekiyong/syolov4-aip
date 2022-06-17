@@ -39,28 +39,41 @@ if __name__ == "__main__":
     Task.force_requirements_env_freeze(force=True, requirements_file='../requirements.txt')
     clearml_task = Task.init(project_name=PROJECT_NAME, task_name='syolov4_'+train_args['name'])
     if args.remote:
+
         # clearml_task.set_base_docker("nvcr.io/nvidia/pytorch:21.06-py3",
         #     docker_arguments=['-w', '/src'],
         #     docker_setup_bash_script=['git clone https://github.com/thomasbrandon/mish-cuda.git', 'ls', 'ls mish-cuda', 'cd mish-cuda', 'python setup.py build install']
         # )
+        # clearml_task.execute_remotely(queue_name="compute")
+
         # clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04",
         #     docker_arguments=['-w', '/src'],
         #     docker_setup_bash_script=['git clone https://github.com/thomasbrandon/mish-cuda.git', 'ls', 'ls mish-cuda', 'cd mish-cuda', 'python3 setup.py build install']
         # )
-        # local_path = os.getcwd()
-        # env_path = '/src'
+        # clearml_task.execute_remotely(queue_name="compute")
+
         clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04")
         clearml_task.execute_remotely(queue_name="compute")
+
+        subprocess.run(["sh", "./install_mish.sh"])
+
         print(os.listdir())
         print(os.getcwd())
         cwd = os.getcwd() # Save current working directory, to jump back later after installation
-        subprocess.run("git clone https://github.com/thomasbrandon/mish-cuda.git".split())
-        os.chdir('mish-cuda')
-        print(os.getcwd())
-        print(os.listdir())
-        subprocess.run(['python3', 'setup.py', 'build', 'install'])
+        # subprocess.run("git clone https://github.com/thomasbrandon/mish-cuda.git".split())
+        # os.chdir('mish-cuda')
+        # print(os.getcwd())
+        # print(os.listdir())
+        # subprocess.run(['python3', 'setup.py', 'build', 'install'])
         # subprocess.call(['python3 setup.py build install', './install_mish.sh'])
-        os.chdir(cwd)
+        # os.chdir(cwd)
+        # for k, v in sorted(os.environ.items()):
+        #     print(k+':', v)
+        # print('\n')
+        subprocess.run(['pip', 'show', 'mish_cuda'])
+        subprocess.run(['pip', 'freeze'])
+
+
 
     # only putting the import statement here because i need to install 
     # the damn mish before i could move on with life, otherwise in normal 
@@ -86,7 +99,7 @@ if __name__ == "__main__":
         data_yaml['train']=train_path
         data_yaml['val']=val_path
         data_yaml['test']=test_path
-        new_yaml_file = args.data[:-5]+"_m.yaml" if args.data[:-5]=='.yaml' else args.data[:-5]+"_m.yaml"
+        new_yaml_file = train_args['data'][:-5]+"_m.yaml" if train_args['data'][-5:]=='.yaml' else train_args['data'][:-4]+"_m.yml"
         with open(new_yaml_file, 'w') as yaml_file:
             yaml.dump(data_yaml, yaml_file, default_flow_style=False)
         train_args['data'] = new_yaml_file # use the modified yaml file
