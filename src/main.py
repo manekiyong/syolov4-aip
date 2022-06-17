@@ -39,9 +39,9 @@ if __name__ == "__main__":
     clearml_task = Task.init(project_name=PROJECT_NAME, task_name='syolov4_'+train_args['name'])
     if args.remote:
 
-        # clearml_task.set_base_docker("nvcr.io/nvidia/pytorch:21.06-py3",
+        # clearml_task.set_base_docker("nvcr.io/nvidia/pytorch:21.09-py3",
         #     docker_arguments=['-w', '/src'],
-        #     docker_setup_bash_script=['git clone https://github.com/thomasbrandon/mish-cuda.git', 'ls', 'ls mish-cuda', 'cd mish-cuda', 'python setup.py build install']
+        #     docker_setup_bash_script=['ls', 'ls mish-cuda', 'cd mish-cuda', 'python setup.py build install', 'cd ..']
         # )
         # clearml_task.execute_remotely(queue_name="compute")
 
@@ -54,29 +54,31 @@ if __name__ == "__main__":
         clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04")
         clearml_task.execute_remotely(queue_name="compute")
 
-        # subprocess.run(["sh", "./install_mish.sh"])
-        subprocess.run(["pip3", "install", "bertopic"])
+        cwd = os.getcwd()
+        os.chdir('mish-cuda/dist')
+        subprocess.run(['pip3', 'install', 'mish_cuda-0.0.3-cp39-cp39-linux_x86_64.whl'])
+        os.chdir(cwd)
+        # # subprocess.run(["sh", "./install_mish.sh"])
 
-        cwd = os.getcwd() # Save current working directory, to jump back later after installation
-        # subprocess.run("git clone https://github.com/thomasbrandon/mish-cuda.git".split())
-        # os.chdir('mish-cuda')
-        # print(os.getcwd())
-        # print(os.listdir())
-        # subprocess.run(['python3', 'setup.py', 'build', 'install'])
-        # subprocess.call(['python3 setup.py build install', './install_mish.sh'])
-        # os.chdir(cwd)
+        #  # Save current working directory, to jump back later after installation
+        # # subprocess.run("git clone https://github.com/thomasbrandon/mish-cuda.git".split())
+        # # os.chdir('mish-cuda')
+        # # print(os.getcwd())
+        # # print(os.listdir())
+        # # subprocess.run(['python3', 'setup.py', 'build', 'install'])
+        # # subprocess.call(['python3 setup.py build install', './install_mish.sh'])
+        # # os.chdir(cwd)
 
-        pypath = os.environ['PYTHONPATH'].replace("::", ":")
-        os.environ['PYTHONPATH']=pypath+':/usr/local/lib/python3.8/dist-packages'
-        # subprocess.run(['export', 'PYTHONPATH=${PYTHONPATH}:/usr/local/lib/python3.8/dist-packages'])
-        for k, v in sorted(os.environ.items()):
-            print(k+':', v)
-        print('\n')
+        # pypath = os.environ['PYTHONPATH'].replace("::", ":")
+        # os.environ['PYTHONPATH']=pypath+':/usr/local/lib/python3.8/dist-packages'
+        # # subprocess.run(['export', 'PYTHONPATH=${PYTHONPATH}:/usr/local/lib/python3.8/dist-packages'])
+        # for k, v in sorted(os.environ.items()):
+        #     print(k+':', v)
+        # print('\n')
         # subprocess.run(['pip', 'show', 'mish_cuda'])
         # subprocess.run(['pip', 'freeze'])
-        # import mish_cuda
-        from bertopic import BERTopic
-        
+        import mish_cuda
+
 
 
 
