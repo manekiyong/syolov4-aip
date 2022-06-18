@@ -11,7 +11,9 @@ ENV PYTHONDONTWRITEBYTECODE 1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED 1
 
-RUN apt-get update && apt-get install libgl1 -y
+# Required for OpenCV2 (Refer to https://stackoverflow.com/questions/55313610/importerror-libgl-so-1-cannot-open-shared-object-file-no-such-file-or-directo)
+RUN apt-get update && apt-get install libgl1 -
+
 ADD requirements.txt .
 RUN python -m pip install -r requirements.txt
 ADD /src /src

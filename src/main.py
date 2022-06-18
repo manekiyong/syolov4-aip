@@ -38,48 +38,18 @@ if __name__ == "__main__":
     Task.force_requirements_env_freeze(force=True, requirements_file='../requirements.txt')
     clearml_task = Task.init(project_name=PROJECT_NAME, task_name='syolov4_'+train_args['name'])
     if args.remote:
-
-        # clearml_task.set_base_docker("nvcr.io/nvidia/pytorch:21.09-py3",
-        #     docker_setup_bash_script=['pwd', 'ls', 'ls mish-cuda', 'cd mish-cuda', 'python setup.py build install', 'cd ..']
-        # )
-        # clearml_task.execute_remotely(queue_name="compute")
-
- 
-        clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04",
-            docker_setup_bash_script=['pip3 show wheel', 'pip show wheel']
+        clearml_task.set_base_docker("nvidia/cuda:11.4.0-runtime-ubuntu20.04",
+            docker_setup_bash_script=['pip3 show wheel', 
+                                    'pip show wheel', 
+                                    'apt-get update && apt-get install libgl1 -y']
         )
         clearml_task.execute_remotely(queue_name="compute")
 
         cwd = os.getcwd()
         os.chdir('mish-cuda/dist')
-        # subprocess.run('python3 -m pip install --upgrade pip'.split())
         subprocess.run(['pip3', 'install', 'mish_cuda-0.0.3-cp38-cp38-linux_x86_64.whl'])
         os.chdir(cwd)
-
-
-        # # subprocess.run(["sh", "./install_mish.sh"])
-
-        #  # Save current working directory, to jump back later after installation
-        # # subprocess.run("git clone https://github.com/thomasbrandon/mish-cuda.git".split())
-        # # os.chdir('mish-cuda')
-        # # print(os.getcwd())
-        # # print(os.listdir())
-        # # subprocess.run(['python3', 'setup.py', 'build', 'install'])
-        # # subprocess.call(['python3 setup.py build install', './install_mish.sh'])
-        # # os.chdir(cwd)
-
-        # pypath = os.environ['PYTHONPATH'].replace("::", ":")
-        # os.environ['PYTHONPATH']=pypath+':/usr/local/lib/python3.8/dist-packages'
-        # # subprocess.run(['export', 'PYTHONPATH=${PYTHONPATH}:/usr/local/lib/python3.8/dist-packages'])
-        # for k, v in sorted(os.environ.items()):
-        #     print(k+':', v)
-        # print('\n')
-        # subprocess.run(['pip', 'show', 'mish_cuda'])
-        # subprocess.run(['pip', 'freeze'])
-        import mish_cuda
-
-
-
+        os.environ['CUDA_LAUNCH_BLOCKING'] = '1' 
 
     # only putting the import statement here because i need to install 
     # the damn mish before i could move on with life, otherwise in normal 
@@ -113,7 +83,7 @@ if __name__ == "__main__":
         # Get Pretrained Model
         pretrained_path = Dataset.get(
             dataset_name='pretrained-p5', 
-            dataset_project='dataset/yolov4/models'
+            dataset_project='datasets/yolov4/models'
         ).get_local_copy()
         pretrained_path = os.path.join(pretrained_path, '')
         train_args['weights'] = pretrained_path+train_args['weights']
