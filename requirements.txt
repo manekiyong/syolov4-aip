@@ -1,6 +1,4 @@
 numpy==1.22.3 # CHANGED
-torch==1.11.0
-torchvision==0.11.1
 setuptools==59.5.0 # Downgrade Necessary
 protobuf==3.20.1 # Downgrade Necessary
 matplotlib
@@ -14,3 +12,9 @@ scipy==1.8.1
 pandas
 clearml==1.4.1
 boto3==1.21.44
+
+--find-links https://download.pytorch.org/whl/cu113/torch_stable.html
+torch==1.10.0+cu113
+torchvision==0.11.1+cu113
+
+./src/mish-cuda/dist/mish_cuda-0.0.3-cp38-cp38-linux_x86_64.whl
