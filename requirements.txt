@@ -17,4 +17,4 @@ boto3==1.21.44
 torch==1.11.0+cu113
 torchvision==0.11.1+cu113
 
-./src/mish-cuda/dist/mish_cuda-0.0.3-cp38-cp38-linux_x86_64.whl
+# ./src/mish-cuda/dist/mish_cuda-0.0.3-cp38-cp38-linux_x86_64.whl

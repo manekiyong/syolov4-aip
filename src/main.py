@@ -39,13 +39,18 @@ if __name__ == "__main__":
     clearml_task = Task.init(project_name=PROJECT_NAME, task_name='syolov4_'+train_args['name'])
     if args.remote:
         clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04",
-            docker_arguments=['-v', '{}:{}'.format(os.getcwd()+'/src/mish-cuda', '/mish')],
             docker_setup_bash_script=['apt-get update && apt-get install libgl1 -y',
                                     'pip3 install torch==1.11.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html',
+                                    'git clone https://github.com/thomasbrandon/mish-cuda.git'
                                     'echo meow',
                                     'pwd',
                                     'ls',
-                                    'ls mish']
+                                    'echo meow',
+                                    'ls mish-cuda',
+                                    'cd mish-cuda',
+                                    'python3 setup.py sdist bdist_wheel',
+                                    'pip install ./dist/mish_cuda-0.0.3-cp38-cp38-linux_x86_64.whl',
+                                    'cd ..']
         )
         clearml_task.execute_remotely(queue_name="compute")
 
