@@ -4,7 +4,7 @@ import os
 import yaml
 import argparse
 import subprocess
-
+import train_aip 
 
 PROJECT_NAME = 'scaled_yolo_v4'
 
@@ -38,35 +38,31 @@ if __name__ == "__main__":
     Task.force_requirements_env_freeze(force=True, requirements_file='../requirements.txt')
     clearml_task = Task.init(project_name=PROJECT_NAME, task_name='syolov4_'+train_args['name'])
     if args.remote:
-        clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04",
+        clearml_task.set_base_docker("nvcr.io/nvidia/pytorch:21.09-py3",
             docker_setup_bash_script=['apt-get update && apt-get install libgl1 -y',
                                     'pip3 install torch==1.11.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html',
-                                    'git clone https://github.com/thomasbrandon/mish-cuda.git'
-                                    'echo meow',
-                                    'pwd',
-                                    'ls',
-                                    'echo meow',
-                                    'ls mish-cuda',
+                                    'git clone https://github.com/thomasbrandon/mish-cuda.git',
                                     'cd mish-cuda',
                                     'python3 setup.py sdist bdist_wheel',
-                                    'pip install ./dist/mish_cuda-0.0.3-cp38-cp38-linux_x86_64.whl',
-                                    'cd ..']
+                                    'pip install ./dist/mish_cuda-0.0.3-cp38-cp38-linux_x86_64.whl', 
+                                    'echo setup successful']
         )
+        print("Starting rEMOTE")
         clearml_task.execute_remotely(queue_name="compute")
+        print("Moving on")
 
-        cwd = os.getcwd()
-        print(cwd)
-        print(os.listdir())
+        # cwd = os.getcwd()
+        # print(cwd)
+        # print(os.listdir())
         # os.chdir('mish-cuda/dist')
         # subprocess.run(['pip3', 'install', 'mish_cuda-0.0.3-cp38-cp38-linux_x86_64.whl'])
         # os.chdir(cwd)
-        os.environ['CUDA_LAUNCH_BLOCKING'] = '1' 
 
     # only putting the import statement here because i need to install 
     # the damn mish before i could move on with life, otherwise in normal 
     # case where environments require no further setup, importing can be 
     # done entirely on the top
-    import train_aip 
+    
     
     ## Set Base Docker & bits for remote execution
     if args.s3:
@@ -115,7 +111,9 @@ if __name__ == "__main__":
         else: 
             args_list.append(str(train_args[x]))
     print(args_list)
+    print("Meow")
     train_aip.main(args_list)
+    print("Meow2")
 
     ## To verify whether clearml is able to capture training through this means
     ## To return path to saved model from train_aip in local path for uploading, if s3=True
