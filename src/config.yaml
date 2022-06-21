@@ -5,7 +5,7 @@ cache_images: false
 cfg: ''
 data: data/goog_dummy.yaml
 device: 0
-epochs: 10
+epochs: 1
 evolve: false
 hyp: ''
 img-size:

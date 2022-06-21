@@ -48,6 +48,7 @@ if __name__ == "__main__":
                                     'echo setup successful']
         )
         print("Starting rEMOTE")
+        clearml_task.connect(train_args, name='train_args')
         clearml_task.execute_remotely(queue_name="compute")
         print("Moving on")
 
@@ -111,9 +112,11 @@ if __name__ == "__main__":
         else: 
             args_list.append(str(train_args[x]))
     print(args_list)
-    print("Meow")
-    train_aip.main(args_list)
-    print("Meow2")
 
-    ## To verify whether clearml is able to capture training through this means
+    train_aip.main(args_list)
+
+    # Clean up the default args of train_aip script
+    for keys in train_args:
+        clearml_task.delete_parameter("Args/"+str(keys))
+
     ## To return path to saved model from train_aip in local path for uploading, if s3=True
