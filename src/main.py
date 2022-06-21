@@ -40,9 +40,9 @@ if __name__ == "__main__":
     if args.remote:
         clearml_task.set_base_docker("nvcr.io/nvidia/pytorch:21.09-py3",
             docker_setup_bash_script=['apt-get update && apt-get install libgl1 -y',
-                                    'pip3 install torch==1.11.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html',
                                     'git clone https://github.com/thomasbrandon/mish-cuda.git',
                                     'cd mish-cuda',
+                                    'cp external/CUDAApplyUtils.cuh csrc/CUDAApplyUtils.cuh',
                                     'python3 setup.py sdist bdist_wheel',
                                     'pip install ./dist/mish_cuda-0.0.3-cp38-cp38-linux_x86_64.whl', 
                                     'echo setup successful']
