@@ -38,18 +38,24 @@ if __name__ == "__main__":
     Task.force_requirements_env_freeze(force=True, requirements_file='../requirements.txt')
     clearml_task = Task.init(project_name=PROJECT_NAME, task_name='syolov4_'+train_args['name'])
     if args.remote:
-        clearml_task.set_base_docker("nvidia/cuda:11.4.0-devel-ubuntu20.04",
-            docker_setup_bash_script=['pip3 show wheel', 
-                                    'pip show wheel', 
-                                    'apt-get update && apt-get install libgl1 -y']
+        clearml_task.set_base_docker("nvidia/cuda:11.4.0-cudnn8-devel-ubuntu20.04",
+            docker_arguments=['-v', '{}:{}'.format(os.getcwd()+'/src/mish-cuda', '/mish')],
+            docker_setup_bash_script=['apt-get update && apt-get install libgl1 -y',
+                                    'pip3 install torch==1.11.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html',
+                                    'echo meow',
+                                    'pwd',
+                                    'ls',
+                                    'ls mish']
         )
         clearml_task.execute_remotely(queue_name="compute")
 
-        # cwd = os.getcwd()
+        cwd = os.getcwd()
+        print(cwd)
+        print(os.listdir())
         # os.chdir('mish-cuda/dist')
         # subprocess.run(['pip3', 'install', 'mish_cuda-0.0.3-cp38-cp38-linux_x86_64.whl'])
         # os.chdir(cwd)
-        # os.environ['CUDA_LAUNCH_BLOCKING'] = '1' 
+        os.environ['CUDA_LAUNCH_BLOCKING'] = '1' 
 
     # only putting the import statement here because i need to install 
     # the damn mish before i could move on with life, otherwise in normal 
