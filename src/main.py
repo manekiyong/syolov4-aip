@@ -4,7 +4,7 @@ import os
 import yaml
 import argparse
 import subprocess
-import train_aip 
+
 
 PROJECT_NAME = 'scaled_yolo_v4'
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     # the damn mish before i could move on with life, otherwise in normal 
     # case where environments require no further setup, importing can be 
     # done entirely on the top
-    
+    import train_aip 
     
     ## Set Base Docker & bits for remote execution
     if args.s3:
