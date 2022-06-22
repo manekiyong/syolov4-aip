@@ -30,13 +30,16 @@ def get_args():
 if __name__ == "__main__":
 
     args = get_args() #Get Clearml args
-
+    print(args)
 
     with open(args.train_config, 'r') as f:
         train_args = yaml.safe_load(f)
 
     Task.force_requirements_env_freeze(force=True, requirements_file='../requirements.txt')
-    clearml_task = Task.init(project_name=PROJECT_NAME, task_name='syolov4_'+train_args['name'])
+    clearml_task = Task.init(project_name=PROJECT_NAME, task_name='syolov4_'+train_args['name'], auto_connect_arg_parser=False)
+
+    clearml_task.connect(args)
+    clearml_task.connect(train_args, name='train_args')
     if args.remote:
         clearml_task.set_base_docker("nvcr.io/nvidia/pytorch:21.09-py3",
             docker_setup_bash_script=['apt-get update && apt-get install libgl1 -y',
@@ -48,7 +51,7 @@ if __name__ == "__main__":
                                     'echo setup successful']
         )
         print("Starting rEMOTE")
-        clearml_task.connect(train_args, name='train_args')
+
         clearml_task.execute_remotely(queue_name="compute")
         print("Moving on")
 
