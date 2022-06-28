@@ -4,7 +4,7 @@ protobuf==3.20.1 # Downgrade Necessary
 matplotlib
 pycocotools
 tqdm
-Pillow==9.1.0 # CHANGED
+Pillow==9.1.1 # CHANGED
 opencv_python==4.5.5.64 # CHANGED
 tensorboard >= 1.14
 pyyaml==6.0

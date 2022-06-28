@@ -1,18 +1,10 @@
-from threading import local
 from clearml import Task, Dataset
 import os
 import yaml
 import argparse
-import subprocess
 
 
 PROJECT_NAME = 'scaled_yolo_v4'
-
-def generate_arg_dict():
-    parser = argparse.ArgumentParser()
-    # PASTE ALL `add_argument` LINES HERE
-    opt = parser.parse_args(args=[])
-    return vars(opt)
 
 
 def get_args():
@@ -30,15 +22,13 @@ def get_args():
 if __name__ == "__main__":
 
     args = get_args() #Get Clearml args
-    print(args)
+
 
     with open(args.train_config, 'r') as f:
         train_args = yaml.safe_load(f)
 
     Task.force_requirements_env_freeze(force=True, requirements_file='../requirements.txt')
-    clearml_task = Task.init(project_name=PROJECT_NAME, task_name='syolov4_'+train_args['name'], auto_connect_arg_parser=False)
-
-    clearml_task.connect(args)
+    clearml_task = Task.init(project_name=PROJECT_NAME, task_name='syolov4_'+train_args['name'])
     clearml_task.connect(train_args, name='train_args')
     if args.remote:
         clearml_task.set_base_docker("nvcr.io/nvidia/pytorch:21.09-py3",
@@ -51,22 +41,11 @@ if __name__ == "__main__":
                                     'echo setup successful']
         )
         print("Starting rEMOTE")
-
         clearml_task.execute_remotely(queue_name="compute")
         print("Moving on")
 
-        # cwd = os.getcwd()
-        # print(cwd)
-        # print(os.listdir())
-        # os.chdir('mish-cuda/dist')
-        # subprocess.run(['pip3', 'install', 'mish_cuda-0.0.3-cp38-cp38-linux_x86_64.whl'])
-        # os.chdir(cwd)
 
-    # only putting the import statement here because i need to install 
-    # the damn mish before i could move on with life, otherwise in normal 
-    # case where environments require no further setup, importing can be 
-    # done entirely on the top
-    import train_aip 
+    
     
     ## Set Base Docker & bits for remote execution
     if args.s3:
@@ -116,6 +95,7 @@ if __name__ == "__main__":
             args_list.append(str(train_args[x]))
     print(args_list)
 
+    import train_aip 
     train_aip.main(args_list)
 
     # Clean up the default args of train_aip script
