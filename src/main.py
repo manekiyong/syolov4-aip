@@ -5,7 +5,7 @@ import argparse
 
 
 PROJECT_NAME = 'scaled_yolo_v4'
-
+S3_LINK = 's3://experiment-logging/'
 
 def get_args():
     # Exact from train.py
@@ -40,13 +40,10 @@ if __name__ == "__main__":
                                     'pip install ./dist/mish_cuda-0.0.3-cp38-cp38-linux_x86_64.whl', 
                                     'echo setup successful']
         )
-        print("Starting rEMOTE")
+
         clearml_task.execute_remotely(queue_name="compute")
-        print("Moving on")
 
-
-    
-    
+ 
     ## Set Base Docker & bits for remote execution
     if args.s3:
         # Obtain Dataset 
@@ -96,10 +93,14 @@ if __name__ == "__main__":
     print(args_list)
 
     import train_aip 
-    train_aip.main(args_list)
+    model_paths = train_aip.main(args_list)
 
     # Clean up the default args of train_aip script
-    for keys in train_args:
-        clearml_task.delete_parameter("Args/"+str(keys))
+    print(model_paths)
 
     ## To return path to saved model from train_aip in local path for uploading, if s3=True
+    if args.s3:
+        dataset = Dataset.create(dataset_name=train_args['name']+'_model', dataset_project = args.data_proj_name)
+        dataset.add_files("./"+model_paths)
+        dataset.upload(output_url=S3_LINK)
+        dataset.finalize()

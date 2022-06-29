@@ -29,6 +29,7 @@ from utils.torch_utils import init_seeds, ModelEMA, select_device, intersect_dic
 
 
 def train(hyp, opt, device, tb_writer=None):
+
     print(f'Hyperparameters {hyp}')
     log_dir = Path(tb_writer.log_dir) if tb_writer else Path(opt.logdir) / 'evolve'  # logging directory
     wdir = str(log_dir / 'weights') + os.sep  # weights directory
@@ -368,7 +369,7 @@ def train(hyp, opt, device, tb_writer=None):
 
     dist.destroy_process_group() if rank not in [-1, 0] else None
     torch.cuda.empty_cache()
-    return results
+    return results, wdir
 
 def main(args=None):
     parser = argparse.ArgumentParser()
@@ -439,7 +440,7 @@ def main(args=None):
             print('Start Tensorboard with "tensorboard --logdir %s", view at http://localhost:6006/' % opt.logdir)
             tb_writer = SummaryWriter(log_dir=increment_dir(Path(opt.logdir) / 'exp', opt.name))  # runs/exp
 
-        train(hyp, opt, device, tb_writer)
+        _, wdir = train(hyp, opt, device, tb_writer)
 
     # Evolve hyperparameters (optional)
     else:
@@ -507,7 +508,7 @@ def main(args=None):
                 hyp[k] = round(hyp[k], 5)  # significant digits
 
             # Train mutation
-            results = train(hyp.copy(), opt, device)
+            results, wdir = train(hyp.copy(), opt, device)
 
             # Write mutation results
             print_mutation(hyp.copy(), results, yaml_file, opt.bucket)
@@ -516,6 +517,7 @@ def main(args=None):
         plot_evolution(yaml_file)
         print('Hyperparameter evolution complete. Best results saved as: %s\nCommand to train a new model with these '
               'hyperparameters: $ python train.py --hyp %s' % (yaml_file, yaml_file))
+    return wdir
 
 if __name__ == '__main__':
     main()
